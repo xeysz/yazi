@@ -1,4 +1,4 @@
-use crossterm::{execute, terminal::SetTitle};
+use crossterm::{execute, style::Print, terminal::SetTitle};
 use yazi_config::YAZI;
 use yazi_fs::CWD;
 use yazi_shared::event::CmdCow;
@@ -9,7 +9,11 @@ use crate::{mgr::Mgr, tasks::Tasks};
 impl Mgr {
 	pub fn refresh(&mut self, _: CmdCow, tasks: &Tasks) {
 		if let (_, Some(s)) = (CWD.set(self.cwd()), YAZI.mgr.title()) {
-			execute!(TTY.writer(), SetTitle(s)).ok();
+			execute!(
+				TTY.writer(),
+				SetTitle(s),
+				Print(format!("\x1b]7;file://{}\x1b\\", self.cwd())),
+			).ok();
 		}
 
 		self.active_mut().apply_files_attrs();
