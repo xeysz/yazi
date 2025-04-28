@@ -1,5 +1,5 @@
 use anyhow::Result;
-use crossterm::{execute, terminal::SetTitle};
+use crossterm::{execute, style::Print, terminal::SetTitle};
 use yazi_config::YAZI;
 use yazi_core::tab::Folder;
 use yazi_fs::{CWD, Files, FilesOp, cha::Cha};
@@ -21,7 +21,11 @@ impl Actor for Refresh {
 
 	fn act(cx: &mut Ctx, _: Self::Options) -> Result<Data> {
 		if let (_, Some(s)) = (CWD.set(cx.cwd(), Self::cwd_changed), YAZI.mgr.title()) {
-			execute!(TTY.writer(), SetTitle(s)).ok();
+                    execute!(
+                        TTY.writer(),
+                        Print(format!("\x1b]7;file://{}\x1b\\", CWD.path().display())),
+                        SetTitle(s),
+                    ).ok();
 		}
 
 		if let Some(p) = cx.parent() {
